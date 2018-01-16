@@ -14,60 +14,6 @@ class GameContainer extends Component {
     density: .25
   }
 
-  _alive2 = [
-    '20-11',
-    '20-14',
-    '22-23',
-    '20-10',
-    '24-30',
-    '24-23',
-    '21-14',
-    '24-18',
-    '23-27',
-    '22-28',
-    '24-20',
-    '23-29',
-    '23-10',
-    '20-16',
-  ]
-
-  _alive3 = [
-    '21-10',
-    '22-16',
-    '24-21',
-    '22-19',
-    '24-25',
-    '23-20',
-    '24-12',
-    '23-25',
-    '22-20',
-    '22-18',
-    '22-24',
-    '23-18',
-    '22-29',
-    '24-19',
-    '24-14',
-  ]
-
-  _alive = [
-    '20-12',
-    '22-10',
-    '22-11',
-    '22-12',
-    '24-10',
-    '24-11',
-    '22-14',
-    '23-14',
-    '23-16',
-    '24-16',
-    '22-25',
-    '23-23',
-    '22-27',
-    '24-27',
-    '24-28',
-    '24-29',
-  ]
-
   componentWillMount() {
     this.randomizeCells()
   }
@@ -119,25 +65,7 @@ class GameContainer extends Component {
       this.isCellAlive(row-1, col-1),
     ].filter(a => a).length
 
-    const good = (numAliveNeighbours === 2 && isAlive) || numAliveNeighbours === 3
-
-    if (this.state.gen > 100) {
-      const dim = 1/(this.state.gen - 99)
-      return Math.random() < dim || this._alive.includes(`${row}-${col}`)
-        ||this._alive2.includes(`${row}-${col}`)
-        ||this._alive3.includes(`${row}-${col}`)
-    } else if (this.state.gen > 80) {
-      return good || this._alive.includes(`${row}-${col}`)
-        ||this._alive2.includes(`${row}-${col}`)
-        ||this._alive3.includes(`${row}-${col}`)
-    } else if (this.state.gen > 60) {
-      return good || this._alive2.includes(`${row}-${col}`)
-        ||this._alive3.includes(`${row}-${col}`)
-    } else if (this.state.gen > 40) {
-      return good || this._alive2.includes(`${row}-${col}`)
-    } else {
-      return good
-    }
+    return (numAliveNeighbours === 2 && isAlive) || numAliveNeighbours === 3
   }
 
   nextGeneration = () => {
@@ -184,6 +112,7 @@ class GameContainer extends Component {
       <Game cellSize={Math.floor(500 / this.props.cols)}
         gen={this.state.gen}
         cells={this.state.cells}
+        density={this.state.density}
         running={this.state.running}
         onCellClick={this.handleCellClick}
         onStartStopClick={this.handleStartStopClick}
