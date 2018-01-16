@@ -1,0 +1,6 @@
+.Cell {
+  height: 8px;
+  width: 8px;
+  display: inline-block;
+  border: 1px solid #aaaaaa;
+}
