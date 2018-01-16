@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import Game from './Game';
+import GameContainer from './GameContainer';
 
 class App extends Component {
   render() {
@@ -15,7 +15,7 @@ class App extends Component {
         <p className="App-intro">
         </p>
 
-        <Game rows={rows} cols={cols} />
+        <GameContainer rows={rows} cols={cols} />
       </div>
     );
   }

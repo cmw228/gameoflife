@@ -4,15 +4,15 @@ import './Grid.css'
 
 class Grid extends Component {
   render() {
-    const style = {
-      width: `${this.props.cols * 10}px`
-    }
-
     const cells = this.props.cells.map((cell, index) =>
-      <Cell alive={cell.alive} key={index} id={`${cell.row}-${cell.col}`} onClick={this.props.onCellClick} />)
+      <Cell key={index}
+        alive={cell.alive}
+        id={`${cell.row}-${cell.col}`}
+        onClick={this.props.onCellClick}
+        size={this.props.cellSize} />)
 
     return (
-      <div className="Grid" style={style}>
+      <div className="Grid">
         {cells}
       </div>
     )
