@@ -7,12 +7,17 @@ class Grid extends Component {
     const cells = this.props.cells.map((cell, index) =>
       <Cell key={index}
         alive={cell.alive}
-        id={`${cell.row}-${cell.col}`}
-        onClick={this.props.onCellClick}
+        row={cell.row}
+        col={cell.col}
+        onCellClick={this.props.onCellClick}
         size={this.props.cellSize} />)
 
+    const style = {
+      border: this.props.boundary === 'dead' ? '1px solid black' : '1px solid transparent'
+    }
+
     return (
-      <div className="Grid">
+      <div className="Grid" style={style}>
         {cells}
       </div>
     )

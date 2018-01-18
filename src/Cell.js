@@ -12,8 +12,9 @@ class Cell extends Component {
     return (
       <div className="Cell"
         style={style}
-        onClick={this.props.onClick}
-        data-id={this.props.id}>
+        onClick={this.props.onCellClick}
+        data-row={this.props.row}
+        data-col={this.props.col}>
       </div>
     );
   }

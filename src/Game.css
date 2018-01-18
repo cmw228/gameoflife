@@ -1,5 +1,31 @@
 .Game {
   text-align: left;
-  width: 500px;
+  width: 502px;
   display: inline-block;
+}
+
+.Game-header {
+  padding-bottom: 8px;
+}
+
+.Game-boundary-conditions {
+  float: right;
+}
+
+.Game-boundary-conditions input {
+  margin-left: 10px;
+}
+
+.Game-controls {
+  padding-top: 8px;
+}
+
+.Game-input-group {
+  margin-bottom: 8px;
+}
+
+.Game-input-group input {
+  margin-right: 5px;
+  margin-left: 5px;
+  width: 60px;
 }
