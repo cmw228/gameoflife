@@ -6,128 +6,130 @@ class GameContainer extends Component {
 
   _cellMap = {}
   _genInterval = null
-  _cols = 40
-  _rows = 40
+  _size = 40
 
+  // Defaults
   state = {
     cells: [],
     gen: 1,
     running: false,
-    density: .25,
+    density: .375,
     boundary: 'toroidal',
-    cols: this._cols,
-    rows: this._rows,
-    cellSize: 500 / this._cols
+    size: this._size,
+    cellSize: 500 / this._size,
+    speed: 100
   }
 
+  // This is called then the game is first rendered.
+  // Initialize the cells with the default grid size
+  // and density
   componentWillMount() {
-    this.randomizeCells()
+    this.randomizeCells(this.state.size, this.state.density)
   }
 
-  randomizeCells = () => {
-    // Set the initial state for the cells and
-    // keep them in an array to maintain order
-    const cells = []
-
-    for (let row = 0; row < this.state.rows; row++) {
-      for (let col = 0; col < this.state.cols; col++) {
-        // Randomize inital alive cells
-        const alive = Math.random() < this.state.density
-        cells.push({ row, col, alive })
-      }
-    }
-
-    // Create an object map for the cells for rapid
-    // lookup later
-    this.writeCellMap(cells)
-
-    this.setState({
-      running: false,
-      gen: 1,
-      cells,
-      cellSize: 500 / this.state.cols
-    })
-  }
-
-  nextGeneration = () => {
-    const cells = []
-
-    for (let row = 0; row < this.state.rows; row++) {
-      for (let col = 0; col < this.state.cols; col++) {
-
-        const numAliveNeighbours = [
-          this.isCellAlive(row, this.colShift(col, 'right')),
-          this.isCellAlive(row, this.colShift(col, 'left')),
-          this.isCellAlive(this.rowShift(row, 'down'), col),
-          this.isCellAlive(this.rowShift(row, 'up'), col),
-          this.isCellAlive(this.rowShift(row, 'down'), this.colShift(col, 'right')),
-          this.isCellAlive(this.rowShift(row, 'down'), this.colShift(col, 'left')),
-          this.isCellAlive(this.rowShift(row, 'up'), this.colShift(col, 'right')),
-          this.isCellAlive(this.rowShift(row, 'up'), this.colShift(col, 'left')),
-        ].filter(a => a).length
-
-        const currentlyAlive = this.isCellAlive(row, col)
-        const willLive = (numAliveNeighbours === 2 && currentlyAlive) || numAliveNeighbours === 3
-
-        cells.push({ row, col, alive: willLive })
-      }
-    }
-
-    // rewrite cell map
-    this.writeCellMap(cells)
-    this.setState({ cells, gen: this.state.gen + 1 })
-  }
-
-  isCellAlive = (row, col) => {
-    return this._cellMap[`${row}-${col}`]
-  }
-
+  // Writes the cell object map from the cell array
   writeCellMap = (cellsArr) => {
     cellsArr.forEach(cell => {
       this._cellMap[`${cell.row}-${cell.col}`] = cell.alive
     })
   }
 
-  rowShift = (row, direction) => {
-    if (direction === 'up') {
+  randomizeCells = (size, density) => {
+    // Set the initial state for the cells and
+    // keep them in an array to maintain order
+    const cells = []
 
-      if (row === 0 && this.state.boundary === 'toroidal') {
-        return this.state.rows - 1
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        cells.push({
+          row,
+          col,
+          alive: Math.random() < density
+        })
       }
-
-      return row - 1
-
-    } else if (direction === 'down') {
-
-      if (row === this.state.rows - 1 && this.state.boundary === 'toroidal') {
-        return 0
-      }
-
-      return row + 1
     }
 
-    throw new Error('Direction must be "up" or "down"')
+    // In case it was running
+    clearInterval(this._genInterval)
+
+    // Create an object map for the cells for rapid
+    // lookup later
+    this.writeCellMap(cells)
+
+    // Update the cells and the new size and density
+    // (if they changed)
+    this.setState({
+      size,
+      density,
+      cells,
+      cellSize: 500 / size,
+      gen: 1,
+      running: false
+    })
   }
 
-  colShift = (col, direction) => {
-    if (direction === 'left') {
-
-      if (col === 0 && this.state.boundary === 'toroidal') {
-        return this.state.cols - 1
-      }
-
-      return col - 1
-
-    } else if (direction === 'right') {
-
-      if (col === this.state.cols - 1 && this.state.boundary === 'toroidal') {
-        return 0
-      }
-
-      return col + 1
+  // These 'getPosition' functions help abtract the idea of an
+  // adjacent cell so we can easily have both toroidal and dead boundary
+  // conditions.
+  getForwardPosition = (pos) => {
+    if (pos === this.state.size - 1 && this.state.boundary === 'toroidal') {
+      return 0
     }
 
-    throw new Error('Direction must be "left" or "right"')
+    return pos + 1
+  }
+
+  getBackwardPosition = (pos) => {
+    if (pos === 0 && this.state.boundary === 'toroidal') {
+      return this.state.size - 1
+    }
+
+    return pos - 1
+  }
+
+  // This is called for every generation
+  nextGeneration = () => {
+    const cells = []
+
+    for (let row = 0; row < this.state.size; row++) {
+      // Get adjacent rows, considering the current
+      // boundary condition
+      const forwardRow = this.getForwardPosition(row)
+      const backwardRow = this.getBackwardPosition(row)
+
+      for (let col = 0; col < this.state.size; col++) {
+        // Get adjacent cols, considering the current
+        // boundary condition
+        const forwardCol = this.getForwardPosition(col)
+        const backwardCol = this.getBackwardPosition(col)
+
+        // Look up all neighbor cells and count how many are alive
+        const numAliveNeighbours = [
+          this._cellMap[`${row}-${forwardCol}`],
+          this._cellMap[`${row}-${backwardCol}`],
+          this._cellMap[`${forwardRow}-${col}`],
+          this._cellMap[`${backwardRow}-${col}`],
+          this._cellMap[`${forwardRow}-${forwardCol}`],
+          this._cellMap[`${forwardRow}-${backwardCol}`],
+          this._cellMap[`${backwardRow}-${forwardCol}`],
+          this._cellMap[`${backwardRow}-${backwardCol}`],
+        ].filter(a => a).length
+
+        // Check the current cell
+        const alive = this._cellMap[`${row}-${col}`]
+
+        // Logic based on the rules from
+        // https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+        const willLive = (numAliveNeighbours === 2 && alive) || numAliveNeighbours === 3
+
+        cells.push({ row, col, alive: willLive })
+      }
+    }
+
+    // Rewrite cell map
+    this.writeCellMap(cells)
+
+    this.setState({ cells, gen: this.state.gen + 1 })
   }
 
 
@@ -137,35 +139,56 @@ class GameContainer extends Component {
     if (this.state.running) {
       clearInterval(this._genInterval)
     } else {
-      this._genInterval = setInterval(this.nextGeneration, 100)
+      this._genInterval = setInterval(this.nextGeneration, this.state.speed)
     }
+
     this.setState({ running: !this.state.running })
   }
 
   handleRandomizeClick = () => {
+    this.randomizeCells(this.state.size, this.state.density)
+  }
+
+  // Kills all cells, and stops iteration if running
+  handleClearClick = () => {
+    this.state.cells.forEach(c => {
+      c.alive = false
+    })
+
     clearInterval(this._genInterval)
-    this.randomizeCells()
-  }
 
-  handleCellClick = (e) => {
-    const row = parseInt(e.target.dataset.row, 10)
-    const col = parseInt(e.target.dataset.col, 10)
-    const cells = this.state.cells
+    this.writeCellMap(this.state.cells)
 
-    const cell = cells.find(c => {
-      return c.row === row && c.col === col
-    })
-
-    cell.alive = !cell.alive
-
-    this._cellMap[`${row}-${col}`] = cell.alive
-    this.setState({ cells })
-  }
-
-  handleDensityChange = (e) => {
     this.setState({
-      density: e.target.value
+      cells: this.state.cells,
+      running: false,
+      gen: 1
     })
+  }
+
+  // Toggles individual cell life. The cell dom object contains
+  // its own row and column in data attributes, which is how we
+  // identify it here
+  handleCellClick = (e) => {
+    if (!this.state.running) {
+      const row = parseInt(e.target.dataset.row, 10)
+      const col = parseInt(e.target.dataset.col, 10)
+      const cells = this.state.cells
+
+      const cell = cells.find(c => {
+        return c.row === row && c.col === col
+      })
+
+      cell.alive = !cell.alive
+
+      this._cellMap[`${row}-${col}`] = cell.alive
+      this.setState({ cells })
+    }
+  }
+
+  // Re-render the cells with a new density
+  handleDensityChange = (e) => {
+    this.randomizeCells(this.state.size, e.target.value)
   }
 
   handleBoundaryChange = (e) => {
@@ -174,33 +197,21 @@ class GameContainer extends Component {
     })
   }
 
-  handleRowsChange = (e) => {
-    this.setState({
-      rows: e.target.value
-    })
+  // Re-render the cells with a new grid size
+  handleSizeChange = (e) => {
+    this.randomizeCells(e.target.value, this.state.density)
   }
 
-  handleColsChange = (e) => {
-    this.setState({
-      cols: e.target.value
-    })
-  }
-
-  handleClearClick = () => {
-    const cells = this.state.cells
-
-    cells.forEach(c => {
-      c.alive = false
-    })
-
-    clearInterval(this._genInterval)
-
-    this.writeCellMap(cells)
+  // When they change the speed, reset the generation interval if
+  // the game is running
+  handleSpeedChange = (e) => {
+    if (this.state.running) {
+      clearInterval(this._genInterval)
+      this._genInterval = setInterval(this.nextGeneration, e.target.value)
+    }
 
     this.setState({
-      cells,
-      running: false,
-      gen: 1
+      speed: parseInt(e.target.value, 10)
     })
   }
 
@@ -210,19 +221,19 @@ class GameContainer extends Component {
         cellSize={this.state.cellSize}
         gen={this.state.gen}
         cells={this.state.cells}
-        cols={this.state.cols}
-        rows={this.state.rows}
+        size={this.state.size}
         density={this.state.density}
         boundary={this.state.boundary}
         running={this.state.running}
+        speed={this.state.speed}
         onCellClick={this.handleCellClick}
         onStartStopClick={this.handleStartStopClick}
         onRandomizeClick={this.handleRandomizeClick}
+        onClearClick={this.handleClearClick}
         onDensityChange={this.handleDensityChange}
         onBoundaryChange={this.handleBoundaryChange}
-        onRowsChange={this.handleRowsChange}
-        onColsChange={this.handleColsChange}
-        onClearClick={this.handleClearClick}
+        onSizeChange={this.handleSizeChange}
+        onSpeedChange={this.handleSpeedChange}
       />
     )
   }

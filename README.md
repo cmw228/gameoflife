@@ -1,41 +1,35 @@
-Diary
+Conway's Game of Life
 
--create the grid
-
--make a component for a single cell. its state can be alive or dead
-
--separate the logic from the ui with the GridContainer component
-
--for each generation, set the state for the Grid, which contain the data
-for all the cells
-
--we need to know every cell's next state before it rerenders the grid
-
--create a cell object map for fast cell lookups but keep the array to
-maintain the order of the cells
-
--the game component is the parent for all the game controls and visual
-components
-
--changing the cols or rows state effects the calls to next generation.
-disable controls while running?
+This project was bootstrapped with Create React App (https://github.com/facebookincubator/create-react-app).
 
 
--boundary condition toggle occurs instantly, while changes to size and
-density require you to click 'apply'
+To run the game, in the project directory run
 
--goal: simplify by applying all changes instantly, or on clicking apply,
-and disabling controls while running
+  yarn install
+  yarn start
 
--simplify by giving the user set options for size, speed, and density to prevent
-bad performance by the user entering in large values. Also easier than
-managing any possible user input
+(or if you don't have yarn):
 
+  npm install
+  npm start
 
-next iteration:
--maybe make the chances of a cell being alive, when rendered, equal to
-the density. can probably use a life cycle hook for this.
-
--remember to disable controls when running
+This will run it on http://localhost:3000
 
 
+An optimized build can be created with
+
+  yarn build
+
+
+The meat of the logic is in GameContainer.js, the parent component for
+the game. Refer the comments there for more details.
+
+Game.js is a stateless component which contains only JSX for the UI.
+
+Grid.js maps the cell array to an array of Cell components (Cell.js), and renders
+them.
+
+And thats about it...
+
+I wrote a short reflection on my thought process while developing the
+game, (Reflection.txt) I recommended reading that before going through the code. :)

@@ -4,9 +4,6 @@ import GameContainer from './GameContainer';
 
 class App extends Component {
   render() {
-    const rows = 50
-    const cols = 50
-
     return (
       <div className="App">
         <header className="App-header">
@@ -15,7 +12,7 @@ class App extends Component {
         <p className="App-intro">
         </p>
 
-        <GameContainer rows={rows} cols={cols} />
+        <GameContainer />
       </div>
     );
   }
