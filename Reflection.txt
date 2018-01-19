@@ -9,37 +9,37 @@ very short generation intervals. The structure of the game also lends itself
 well to React — it’s easy to imagine each cell as a component, with the parent
 component setting the state of cell on each generation.
 
-With this concept in mind, I began by creating a simple Cell component with three 
-properties: alive, row, and column. The Cell can then handle its style changes based 
-off its properties (such as becoming black when alive). Next, I created a Grid 
-component which renders multiple cells from an array of cell objects. I used an array 
+With this concept in mind, I began by creating a simple Cell component with three
+properties: alive, row, and column. The Cell can then handle its style changes based
+off its properties (such as becoming black when alive). Next, I created a Grid
+component which renders multiple cells from an array of cell objects. I used an array
 for this so they would maintain their order and display property in the UI.
 
-When the cell array is created initially, each is assigned an ‘alive’ value based on 
-Math.random() < d where d is a density value chosen by the user. The user can then, if 
+When the cell array is created initially, each is assigned an ‘alive’ value based on
+Math.random() < d where d is a density value chosen by the user. The user can then, if
 they choose, clear all the live cells and manually choose their initial state by clicking
- each cell. The user can also re-render the cells by clicking randomize, changing the density,
- or changing the size of the grid. The boundary condition can also be toggled between 
-Toroidal (edge cells are adjacent to the cells on the opposite edge) and Dead (edge cells 
+each cell. The user can also re-render the cells by clicking randomize, changing the density,
+or changing the size of the grid. The boundary condition can also be toggled between
+Toroidal (edge cells are adjacent to the cells on the opposite edge) and Dead (edge cells
 are adjacent to dead ‘cells’).
 
 When the game is running, most settings are disabled since they would require the
- grid to be re-rendered or would disrupt the flow of the game. Speed can be changed
- while running, however.
+grid to be re-rendered or would disrupt the flow of the game. Speed can be changed
+while running, however.
 
-When considering optimizations, I decided to include a cell object map along with the 
+When considering optimizations, I decided to include a cell object map along with the
 array so they could be looked up with constant time. This is beneficial for the generation
- iteration since it must do 9 look ups for each cell — 8 neighbors and the cell itself, to 
-decide if the cell will live to the next generation. The tradeoff is having to update the 
+iteration since it must do 9 look ups for each cell — 8 neighbors and the cell itself, to
+decide if the cell will live to the next generation. The tradeoff is having to update the
 cell object map along with the array whenever it changes.
 
-Lastly, on the UI — I decided to limit the customization of grid size, density, and 
-speed, to a few set options. This allowed me to focus on the functionality of the game 
-rather than input validation. Allowing more fine-grained options is something I would 
+Lastly, on the UI — I decided to limit the customization of grid size, density, and
+speed, to a few set options. This allowed me to focus on the functionality of the game
+rather than input validation. Allowing more fine-grained options is something I would
 consider in a future iteration.
 
-Questions I’ve been pondering: 
--Is it necessary to lookup all 8 neighbors for every cell or are there some eliminations 
+Questions I’ve been pondering:
+-Is it necessary to lookup all 8 neighbors for every cell or are there some eliminations
 I can make?
 -Can I get away with using only the object map so I don’t have to maintain 2 cell datasets?
 -How can I efficiently maintain the display order of the cells without the array?
